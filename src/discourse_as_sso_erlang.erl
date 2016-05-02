@@ -12,6 +12,16 @@
 %% API functions
 %%====================================================================
 
+-type discourse_host() :: string().                                                                                
+-type nonce() :: string().                                                                                
+-type redirect_url() :: string().                                                                                
+-type return_url() :: string().                                                                                
+-type key() :: string().                                                                                
+-type query_string() :: binary().
+-type user_nvs() :: #{}.
+
+-spec validate_query_string(query_string(), key()) ->
+  invalid | {valid, nonce(), user_nvs()}.  
 validate_query_string(QueryString,Key) ->
   OverallQS = maps:from_list(cow_qs:parse_qs(QueryString)),
   Sso = maps:get(<<"sso">>,OverallQS),
@@ -26,7 +36,7 @@ validate_sso_return_values(Sso,Sig,Key) ->
   HexString = make_HMAC_SHA256_signature(URIDecoded,Key),  
   case HexString == Sig of   
     true ->  
-      {valid, NonceFrom,QPs};  
+      {valid, binary_to_list(NonceFrom),QPs};  
     false ->  
       invalid  
   end.  
@@ -37,6 +47,8 @@ get_sso_api_values(ReturnURL,Key) ->
   HexSignature = make_HMAC_SHA256_signature(Base64EncodedPayload,Key),  
   { URLEncodedPayload,HexSignature,Nonce }.
 
+-spec as_formatted(discourse_host(), return_url(), key()) -> 
+      {redirect_url(), nonce()}.  
 as_formatted(YourDiscourseForum,ReturnURL,Key) ->
   { URLEncodedPayload,HexSignature,Nonce } = get_sso_api_values(ReturnURL,Key),
   ForwardString = io_lib:format("~s/session/sso_provider?sso=~s&sig=~s",
