@@ -2,7 +2,7 @@
 
 %% API exports
 -export([
-        as_formatted/2,
+        as_formatted/3,
         get_sso_api_values/2,
         validate_sso_return_values/3
 ]).
@@ -30,10 +30,11 @@ get_sso_api_values(ReturnURL,Key) ->
   HexSignature = make_HMAC_SHA256_signature(Base64EncodedPayload,Key),  
   { URLEncodedPayload,HexSignature,Nonce }.
 
-as_formatted(ReturnURL,Key) ->
+as_formatted(YourDiscourseForum,ReturnURL,Key) ->
   { URLEncodedPayload,HexSignature,Nonce } = get_sso_api_values(ReturnURL,Key),
-  io:format("https://forum.wordadoplicus.com/session/sso_provider?sso=~s&sig=~s~n",[URLEncodedPayload,HexSignature ]),
-  Nonce.
+  ForwardString = io_lib:format("~s/session/sso_provider?sso=~s&sig=~s",
+                      [YourDiscourseForum,URLEncodedPayload,HexSignature ]),
+  {lists:flatten(ForwardString),Nonce}.
 
 
 
