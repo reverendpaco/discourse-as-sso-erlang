@@ -45,7 +45,7 @@ tuple:  `{ URLEncodedPayload,HexSignature,Nonce }`.
 You can create the redirect URL on your own, or you can use the helper method
 as_formatted, which takes one more parameter which is the location of your
 Discourse forum software and which generates the full URL to redirect to for
-you.  **It is up to you to re-direct.  This library is not HTTP-aware**.
+you.  **It is up to you to re-direct.**  This library is not HTTP-aware.
 
 Example:
 ```erlang
@@ -53,5 +53,18 @@ Example:
 
 {"https://forum.wordadoplicus.com/session/sso_provider?sso=bm9uY2U9MWM1N2Fld3Y5NHQwYiZyZXR1cm5fc3NvX3VybD1odHRwczovL3dvcmRhZG9wbGljdXMuY29tL3JldHVybl91cmw%3D&sig=ee050c6e5e3a532a386c99d4c177c49254abd547f397e137a2bfd2fe116b5cac",
  "1c57aewv94t0b"}
+```
+
+```erlang
+16> discourse_as_sso_erlang:validate_query_string(<<"sso=bm9uY2U9MWM1MzR0YmJxbTBnZyZuYW1lPURhbmllbG9wb2RvbiZ1c2VybmFt%0AZT13b3JkYWRvcGxpY3VzLWFkbWluJmVtYWlsPXNlcnZpY2UlNDB3b3JkYWRv%0AcGxpY3VzLmNvbSZleHRlcm5hbF9pZD0xJnJldHVybl9zc29fdXJsPWh0dHBz%0AJTNBJTJGJTJGd29yZGFkb3BsaWN1cy5jb20lMkZib29vJmFkbWluPXRydWUm%0AbW9kZXJhdG9yPWZhbHNl%0A&sig=0e59abaca0a6ec881d91d54ad8ce8feab65acebd467b28e7361a2c9dc822fc73">>,"wacopacotaco").
+{valid,<<"1c534tbbqm0gg">>,
+       #{<<"admin">> => <<"true">>,
+         <<"email">> => <<"service@wordadoplicus.com">>,
+         <<"external_id">> => <<"1">>,
+         <<"moderator">> => <<"false">>,
+         <<"name">> => <<"Danielopodon">>,
+         <<"nonce">> => <<"1c534tbbqm0gg">>,
+         <<"return_sso_url">> => <<"https://wordadoplicus.com/booo">>,
+         <<"username">> => <<"wordadoplicus-admin">>}}
 ```
 

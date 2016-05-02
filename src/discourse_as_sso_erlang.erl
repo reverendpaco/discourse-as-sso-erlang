@@ -4,13 +4,20 @@
 -export([
         as_formatted/3,
         get_sso_api_values/2,
-        validate_sso_return_values/3
+        validate_sso_return_values/3,
+        validate_query_string/2
 ]).
 
 %%====================================================================
 %% API functions
 %%====================================================================
-  
+
+validate_query_string(QueryString,Key) ->
+  OverallQS = maps:from_list(cow_qs:parse_qs(QueryString)),
+  Sso = maps:get(<<"sso">>,OverallQS),
+  Sig = maps:get(<<"sig">>,OverallQS),
+  validate_sso_return_values(Sso,Sig,Key).
+
 validate_sso_return_values(Sso,Sig,Key) ->  
   URIDecoded = http_uri:decode(binary_to_list(Sso)),  
   QueryString = base64:decode(URIDecoded),  
