@@ -50,19 +50,27 @@ url that you specified).
 ```
 
 Mostly, you will use `as_formatted` and `validate_query_string`.  These methods
-wrap the ohter two, but handle creating (or decoding) URLs. 
+wrap the other two, but handle creating (or decoding) URLs. 
 
 ```erlang
 -spec as_formatted(discourse_host(), return_url(), key()) -> 
       {redirect_url(), nonce()}.  
 ```
 **It is up to you to re-direct.**  This library is not HTTP-aware.
-
+It is also up to you to store the nonce. This will be your lookup-key for 
+when Discourse redirects back to the `return_url()`.
 
 ```erlang
 -spec validate_query_string(query_string(), key()) ->
   invalid | {valid, nonce(), user_nvs()}.  
 ```
+**It is up to you to have an HTTP client (Cowboy?) listening at `return_url()`**  This library
+is not HTTP-aware.  If parsed and valid, you will use the nonce that was encoded in the payload
+to lookup any stored values, etc, to know which request this is.  You should probably set your own 
+cookies, so as not to have to go back to Discourse for re-authentication. 
+
+The nonce that this library generates is a Crockford32-encoded random id.  Not quite as _rare_ as a UUID, 
+but probably not going to hit you anytime in the next eon.  Nonces are momentary anyways.
 
 Examples:
 ====
@@ -77,7 +85,7 @@ Example of Encoding payload to send to Discourse:
 Example of Decoding return values from Discourse:
 ```erlang
 16> discourse_as_sso_erlang:validate_query_string(<<"sso=bm9uY2U9MWM1MzR0YmJxbTBnZyZuYW1lPURhbmllbG9wb2RvbiZ1c2VybmFt%0AZT13b3JkYWRvcGxpY3VzLWFkbWluJmVtYWlsPXNlcnZpY2UlNDB3b3JkYWRv%0AcGxpY3VzLmNvbSZleHRlcm5hbF9pZD0xJnJldHVybl9zc29fdXJsPWh0dHBz%0AJTNBJTJGJTJGd29yZGFkb3BsaWN1cy5jb20lMkZib29vJmFkbWluPXRydWUm%0AbW9kZXJhdG9yPWZhbHNl%0A&sig=0e59abaca0a6ec881d91d54ad8ce8feab65acebd467b28e7361a2c9dc822fc73">>,"wacopacotaco").
-{valid,<<"1c534tbbqm0gg">>,
+{valid,"1c534tbbqm0gg",
        #{<<"admin">> => <<"true">>,
          <<"email">> => <<"service@wordadoplicus.com">>,
          <<"external_id">> => <<"1">>,
