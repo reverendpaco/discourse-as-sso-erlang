@@ -4,7 +4,7 @@
   {registered, []},
   {applications,
    [kernel,
-    cowblib,
+    cowlib,
     stdlib
    ]},
   {env,[]},
