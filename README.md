@@ -15,7 +15,7 @@ software as an SSO endpoint in this post:
 
 
 
-This is **NOT** for the reverse case, where you have a Discoure forum and want
+This is **NOT** for the reverse case, where you have a Discourse forum and want
 to use another system as your single-sign-on.
 
 This is a low-level library for generating the payload according to the
