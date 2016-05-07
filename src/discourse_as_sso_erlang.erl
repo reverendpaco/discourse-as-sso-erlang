@@ -2,8 +2,12 @@
 
 %% API exports
 -export([
+        as_formatted/4,
+        get_sso_api_values/3,
+
         as_formatted/3,
         get_sso_api_values/2,
+
         validate_sso_return_values/3,
         validate_query_string/2
 ]).
@@ -41,16 +45,22 @@ validate_sso_return_values(Sso,Sig,Key) ->
       invalid  
   end.  
   
-get_sso_api_values(ReturnURL,Key) ->  
+get_sso_api_values(ReturnURL,NoUserFoundUrl,Key) ->  
   Nonce = new_nonce(),  
-  {URLEncodedPayload,Base64EncodedPayload} = make_url_encoded_payload(Nonce,ReturnURL),   
+  {URLEncodedPayload,Base64EncodedPayload} = make_url_encoded_payload(Nonce,ReturnURL,NoUserFoundUrl),   
   HexSignature = make_HMAC_SHA256_signature(Base64EncodedPayload,Key),  
   { URLEncodedPayload,HexSignature,Nonce }.
+
+get_sso_api_values(ReturnURL,Key) ->  
+  get_sso_api_values(ReturnURL,undefined,Key).
 
 -spec as_formatted(discourse_host(), return_url(), key()) -> 
       {redirect_url(), nonce()}.  
 as_formatted(YourDiscourseForum,ReturnURL,Key) ->
-  { URLEncodedPayload,HexSignature,Nonce } = get_sso_api_values(ReturnURL,Key),
+  as_formatted(YourDiscourseForum,ReturnURL,undefined,Key).
+
+as_formatted(YourDiscourseForum,ReturnURL,NoUserFoundUrl,Key) ->
+  { URLEncodedPayload,HexSignature,Nonce } = get_sso_api_values(ReturnURL,NoUserFoundUrl, Key),
   ForwardString = io_lib:format("~s/session/sso_provider?sso=~s&sig=~s",
                       [YourDiscourseForum,URLEncodedPayload,HexSignature ]),
   {lists:flatten(ForwardString),Nonce}.
@@ -65,14 +75,17 @@ make_HMAC_SHA256_signature(Base64EncodedPayload,Key) ->
   SHASig = crypto:hmac(sha256,Key,Base64EncodedPayload),
   hexlify(SHASig).
 
-make_url_encoded_payload(Nonce,ReturnURL) ->
-  Payload = [<<"nonce=">>,Nonce,<<"&return_sso_url=">>,ReturnURL], 
+make_url_encoded_payload(Nonce,ReturnURL,NoUserFoundUrl) ->
+  Optional  = case NoUserFoundUrl of 
+                undefined ->
+                  [];
+                X ->
+                  [<<"&no_user_found_return_sso_url=">>,X]
+              end,
+  Payload = [<<"nonce=">>,Nonce,<<"&return_sso_url=">>,ReturnURL,Optional], 
   Base64EncodedPayload = base64:encode(iolist_to_binary(Payload)),
   URLEncodedPayload = http_uri:encode(binary_to_list(Base64EncodedPayload)),
   {URLEncodedPayload,Base64EncodedPayload}.
-
-
-
 
 new_nonce() ->
  id_generation_tools:genWordadoplicusUnique(). 
