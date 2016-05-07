@@ -80,7 +80,7 @@ make_url_encoded_payload(Nonce,ReturnURL,NoUserFoundUrl) ->
                 undefined ->
                   [];
                 X ->
-                  [<<"&no_user_found_return_sso_url=">>,X]
+                  [<<"&return_sso_unlogged_in_url=">>,X]
               end,
   Payload = [<<"nonce=">>,Nonce,<<"&return_sso_url=">>,ReturnURL,Optional], 
   Base64EncodedPayload = base64:encode(iolist_to_binary(Payload)),
