@@ -1,6 +1,6 @@
 {application, discourse_as_sso_erlang,
  [{description, "Low-level erlang library to encode/decode payloads for using the forum software Discourse as an SSO endpoint."},
-  {vsn, "0.7.0"},
+  {vsn, "0.8.0"},
   {registered, []},
   {applications,
    [kernel,
